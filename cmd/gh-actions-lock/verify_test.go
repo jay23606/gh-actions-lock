@@ -11,7 +11,6 @@ import (
 	parserlock "github.com/github/actions-lockfile/go/pkg/lockfile"
 	"github.com/github/gh-actions-lock/cmd/gh-actions-lock/format"
 	"github.com/github/gh-actions-lock/internal/ghapi/httpmock"
-	"github.com/github/gh-actions-lock/internal/pipeline"
 	"github.com/github/gh-actions-lock/internal/pipeline/checks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -150,7 +149,7 @@ jobs:
 				} else {
 					assert.Contains(t, stdout+stderr, "./my-action")
 					assert.Contains(t, stdout+stderr, "Cannot follow 1 workspace-local action")
-					assert.Contains(t, stdout+stderr, pipeline.LocalActionDocURL)
+					assert.Contains(t, stdout+stderr, checks.LocalAction.DocURL())
 				}
 				after, err := os.ReadFile(path)
 				require.NoError(t, err)
@@ -318,6 +317,7 @@ jobs:
 			for _, f := range p.Findings {
 				hasError = hasError || f.Severity == string(checks.SeverityError)
 				cats = append(cats, f.Category)
+				assert.Equal(t, checks.Category(f.Category).DocURL(), f.DocURL, "%s links its own section", f.Category)
 			}
 			// Fix runs report the pre-fix diagnosis, so only the read-only
 			// modes tie errors to the exit code.
